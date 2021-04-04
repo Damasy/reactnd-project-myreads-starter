@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 export default class Book extends Component {
   static propTypes = {
     title: PropTypes.string.isRequired,
-    authors: PropTypes.array.isRequired,
+    authors: PropTypes.string.isRequired,
     imageLink: PropTypes.string.isRequired,
   };
 
@@ -37,15 +37,14 @@ export default class Book extends Component {
   }
 
   render() {
-    const {title, authors, imageLink} = this.props
+    const {title, authors, imageLink, shelf} = this.props
     return (
       <div className="book">
         <div className="book-top">
           <div className="book-cover" style={{ width: 128, height: 192, backgroundImage: `url(${imageLink})` }}></div>
           <div className="book-shelf-changer">
-            <select onChange={(e) => this.handleChange(e)}>
+            <select onChange={(e) => this.handleChange(e)} value={this.props.query ? shelf : null}>
               <option value="move" disabled>Move to...</option>
-              <option value="">Choose shelf</option>
               <option value="currentlyReading">Currently Reading</option>
               <option value="wantToRead">Want to Read</option>
               <option value="read">Read</option>

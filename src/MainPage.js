@@ -8,7 +8,6 @@ export default class MainPage extends Component {
   state = {
     books: [],
     shelfs: [],
-    query: '',
     searchedBooks: []
   }
   componentDidMount() {
@@ -90,54 +89,46 @@ export default class MainPage extends Component {
 
   searchedBookUpdate = (query) => {
     if (query) {
-      this.setState(
-        {
-          query,
-        },
-        () => {
-          const { query } = this.state;
-          return BookAPI.search(query).then((books) => {
-            if (books.error) {
-              this.setState((state, props) => {
-                return { searchedBooks: [], error: true };
-              });
-            } else {
-              function updateSearchedBooks(shelfBooks) {
-                const updatedBookSearch = [];
-                for (let i = 0; i < books.length; i++) {
-                  for (let j = 0; j < shelfBooks.length; j++) {
-                    if (books[i].id === shelfBooks[j].id) {
-                      updatedBookSearch.push({
-                        ...books[i],
-                        shelf: shelfBooks[j].shelf,
-                      });
-                      books.splice(i, 1);
-                    }
-                  }
+      return BookAPI.search(query).then((books) => {
+        if (books.error) {
+          this.setState((state, props) => {
+            return { searchedBooks: [], error: true };
+          });
+        } else {
+          function updateSearchedBooks(shelfBooks) {
+            const updatedBookSearch = [];
+            for (let i = 0; i < books.length; i++) {
+              for (let j = 0; j < shelfBooks.length; j++) {
+                if (books[i].id === shelfBooks[j].id) {
+                  updatedBookSearch.push({
+                    ...books[i],
+                    shelf: shelfBooks[j].shelf,
+                  });
+                  books.splice(i, 1);
                 }
-                return [...books, ...updatedBookSearch];
               }
-              const updatedBookSearch = updateSearchedBooks(this.state.books);
-              this.setState((state, props) => {
-                return {
-                  error: false,
-                  searchedBooks: updatedBookSearch
-                    .filter((book) => book.imageLinks)
-                    .map((book) => ({
-                      id: book.id,
-                      title: book.title,
-                      authors: book.authors
-                        ? book.authors
-                        : ["No authors found"],
-                      imageLink: book.imageLinks.smallThumbnail,
-                      shelf: book.shelf ? book.shelf : "none",
-                    })),
-                };
-              });
             }
+            return [...books, ...updatedBookSearch];
+          }
+          const updatedBookSearch = updateSearchedBooks(this.state.books);
+          this.setState((state, props) => {
+            return {
+              error: false,
+              searchedBooks: updatedBookSearch
+                .filter((book) => book.imageLinks)
+                .map((book) => ({
+                  id: book.id,
+                  title: book.title,
+                  authors: book.authors
+                    ? book.authors.join(', ')
+                    : "No authors found",
+                  imageLink: book.imageLinks.smallThumbnail,
+                  shelf: book.shelf ? book.shelf : "none",
+                })),
+            };
           });
         }
-      );
+      });
     } else {
       this.resetSearch();
     }

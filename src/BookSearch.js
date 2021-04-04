@@ -11,7 +11,6 @@ export default class BookSearch extends Component {
   };
   
   state = {
-    book: null,
     query: ''
   }
 
@@ -46,15 +45,7 @@ export default class BookSearch extends Component {
 
   addNewBook = (idx, shelf) => {
     const newBook = this.props.books.find((b) => b.id === idx);
-    this.setState(
-      {
-        book: newBook,
-      },
-      () => {
-        const { book } = this.state;
-        this.props.addBook(book, shelf);
-      }
-    );
+    this.props.addBook(newBook, shelf);
   };
 
   handleClick = () => {

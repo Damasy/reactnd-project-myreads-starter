@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 
 export default class BookShelf extends Component {
   static propTypes = {
-    shelf: PropTypes.string.isRequired,
+    shelfs: PropTypes.object.isRequired,
     books: PropTypes.array.isRequired,
   };
 

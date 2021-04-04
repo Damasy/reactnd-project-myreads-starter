@@ -85,8 +85,28 @@ The backend API uses a fixed set of cached search results and is limited to a pa
 
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app). You can find more information on how to perform common tasks [here](https://github.com/facebookincubator/create-react-app/blob/master/packages/react-scripts/template/README.md).
 
+This application helps the user track and manage books in a digital library while categorizing the status of each book according to its location on a library shelf. The available shelfs are :
+
+- Currently Reading
+- Want to Read
+- Read
+- None (to remove a book)
+
+## Running the Application
+
+To run this app:
+
+- Clone or download the repo to your computer
+- Navigate to the directory where you saved the folder: MacOS: [`macOS Terminal Navigation`](https://wiki.communitydata.science/MacOS_terminal_navigation). Window:
+  [`Windows Terminal Navigation`](https://wiki.communitydata.science/Windows_terminal_navigation)
+- install all project dependencies with `npm install`
+- start the development server with `npm start`
+- Navigate to http://localhost:3000/ on your browser.
+
+### Search Terms
+
+More books can be retrieved from the server on the search page http://localhost:3000/search. Refer to the SEARCH_TERMS.md file
+
 ## Contributing
 
-This repository is the starter code for _all_ Udacity students. Therefore, we most likely will not accept pull requests.
-
-For details, check out [CONTRIBUTING.md](CONTRIBUTING.md).
+Ahmed Damasy. Thanks to the Udacity backend server team for the BooksApi file, icons and initial setup.
