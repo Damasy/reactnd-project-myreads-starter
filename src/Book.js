@@ -1,14 +1,44 @@
 import React, { Component } from 'react'
 
 export default class Book extends Component {
+  state = {
+    shelf: ''
+  }
+
+  handleChange = (e) => {
+    if(this.props.query) {
+      // Search
+      this.setState(
+        {
+          shelf: e.target.value,
+        },
+        () => {
+          this.props.addNewBook(this.props.id, this.state.shelf);
+        }
+      );
+    } else {
+      // list
+      this.setState(
+        {
+          shelf: e.target.value,
+        },
+        () => {
+          this.props.updateBook(this.props.id, this.state.shelf);
+        }
+      );
+    }
+  }
+
   render() {
+    const {title, authors, imageLink} = this.props
     return (
       <div className="book">
         <div className="book-top">
-          <div className="book-cover" style={{ width: 128, height: 192, backgroundImage: 'url("http://books.google.com/books/content?id=32haAAAAMAAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE72yckZ5f5bDFVIf7BGPbjA0KYYtlQ__nWB-hI_YZmZ-fScYwFy4O_fWOcPwf-pgv3pPQNJP_sT5J_xOUciD8WaKmevh1rUR-1jk7g1aCD_KeJaOpjVu0cm_11BBIUXdxbFkVMdi&source=gbs_api")' }}></div>
+          <div className="book-cover" style={{ width: 128, height: 192, backgroundImage: `url(${imageLink})` }}></div>
           <div className="book-shelf-changer">
-            <select>
+            <select onChange={(e) => this.handleChange(e)}>
               <option value="move" disabled>Move to...</option>
+              <option value="">Choose shelf</option>
               <option value="currentlyReading">Currently Reading</option>
               <option value="wantToRead">Want to Read</option>
               <option value="read">Read</option>
@@ -16,8 +46,8 @@ export default class Book extends Component {
             </select>
           </div>
         </div>
-        <div className="book-title">The Adventures of Tom Sawyer</div>
-        <div className="book-authors">Mark Twain</div>
+        <div className="book-title">{title}</div>
+        <div className="book-authors">{authors}</div>
       </div>
     )
   }

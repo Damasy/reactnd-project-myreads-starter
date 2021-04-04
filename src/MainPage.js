@@ -1,17 +1,188 @@
-import React, { Component } from 'react'
-import { Route } from 'react-router-dom'
-import BookSearch from './BookSearch'
-import BookShelf from './BookShelf'
+import React, { Component } from 'react';
+import { Route } from 'react-router-dom';
+import BookSearch from './BookSearch';
+import BookShelf from './BookShelfs';
+import * as BookAPI from './BooksAPI';
 
 export default class MainPage extends Component {
+  state = {
+    books: [],
+    shelfs: [],
+    query: '',
+    searchedBooks: []
+  }
+  componentDidMount() {
+    BookAPI.getAll().then(data => {
+      this.setState({books: data});
+      this.generateShelfs(data);
+    })
+  }
+
+  generateShelfs = (books) => {
+    const shelfs = {
+      "currentlyReading": [],
+      "wantToRead": [],
+      "read": []
+    };
+
+    for(let i=0;i<books.length;i++) {
+      const book = books[i]
+      const obj = {
+        title: book.title,
+        authors: book.authors.join(', '),
+        imageLink: book.imageLinks ? book.imageLinks.thumbnail : book.imageLink,
+        id: book.id,
+        shelf: book.shelf
+      }
+      if(shelfs[book.shelf]) {
+        shelfs[book.shelf].push(obj);
+        continue;
+      }
+    }
+
+    this.setState({shelfs: shelfs});
+  }
+
+  updateBookShelf = (updatedBook, shelf) => {
+    BookAPI.update(updatedBook, shelf).then(() => {
+      const booksInShelf = [...this.state.books]
+        .filter((book) => book.shelf !== "None")
+        .map((book) => {
+          if (book.id === updatedBook.id) {
+            return { ...book, shelf };
+          }
+          return book;
+        });
+
+      this.setState((state, props) => {
+        return {
+          books: booksInShelf,
+        };
+      });
+      this.generateShelfs(this.state.books)
+    });
+  };
+
+  addBook = (newBook, shelf) => {
+    BookAPI.update(newBook, shelf).then(() => {
+      const newBooks = [...this.state.searchedBooks].map((book) => {
+        if (book.id === newBook.id) {
+          return { ...book, shelf };
+        }
+        return book;
+      });
+      this.setState((state, props) => {
+        return {
+          searchedBooks: newBooks,
+        };
+      });
+      this.setState((state, props) => {
+        const bookSet = [
+          ...new Set([...this.state.books, { ...newBook, shelf }]),
+        ];
+        return {
+          books: bookSet,
+        };
+      });
+      this.generateShelfs(this.state.books);
+    });
+  };
+
+  searchedBookUpdate = (query) => {
+    if (query) {
+      this.setState(
+        {
+          query,
+        },
+        () => {
+          const { query } = this.state;
+          return BookAPI.search(query).then((books) => {
+            if (books.error) {
+              this.setState((state, props) => {
+                return { searchedBooks: [], error: true };
+              });
+            } else {
+              function updateSearchedBooks(shelfBooks) {
+                const updatedBookSearch = [];
+                for (let i = 0; i < books.length; i++) {
+                  for (let j = 0; j < shelfBooks.length; j++) {
+                    if (books[i].id === shelfBooks[j].id) {
+                      updatedBookSearch.push({
+                        ...books[i],
+                        shelf: shelfBooks[j].shelf,
+                      });
+                      books.splice(i, 1);
+                    }
+                  }
+                }
+                return [...books, ...updatedBookSearch];
+              }
+              const updatedBookSearch = updateSearchedBooks(this.state.books);
+              this.setState((state, props) => {
+                return {
+                  error: false,
+                  searchedBooks: updatedBookSearch
+                    .filter((book) => book.imageLinks)
+                    .map((book) => ({
+                      id: book.id,
+                      title: book.title,
+                      authors: book.authors
+                        ? book.authors
+                        : ["No authors found"],
+                      imageLink: book.imageLinks.smallThumbnail,
+                      shelf: book.shelf ? book.shelf : "none",
+                    })),
+                };
+              });
+            }
+          });
+        }
+      );
+    } else {
+      this.resetSearch();
+    }
+  };
+
+  resetSearch = () => {
+    this.setState((state, props) => {
+      return {
+        searchedBooks: [],
+      };
+    });
+  };
+
   render() {
     return (
       <div className="app">
         <Route path="/search" render={
-          () => (<BookSearch/>)
+          () => this.state.error === true ? ( <div>
+            <BookSearch
+              books={this.state.searchedBooks}
+              searchBookUpdate={this.searchedBookUpdate}
+              addBook={this.addBook}
+              clearSearch={this.resetSearch}
+            />
+            <h1 style={{ color: "#485156", padding: "20px" }}>
+              <small style={{ fontSize: "1.5rem", fontWeight: "300" }}>
+                No results found...
+              </small>
+              <i className="fas fa-frown"></i>
+            </h1>
+          </div>
+        ) : (
+          <BookSearch
+            books={this.state.searchedBooks}
+            searchBookUpdate={this.searchedBookUpdate}
+            addBook={this.addBook}
+            clearSearch={this.resetSearch}
+          />
+        )
         } />
         <Route exact path="/" render={
-          () => (<BookShelf/>)
+          () => (<BookShelf
+            shelfs={this.state.shelfs}
+            books={this.state.books}
+            updateBookShelf={this.updateBookShelf}/>)
         } />
       </div>
     )
