@@ -1,6 +1,13 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
+import PropTypes from "prop-types";
 
 export default class Book extends Component {
+  static propTypes = {
+    title: PropTypes.string.isRequired,
+    authors: PropTypes.array.isRequired,
+    imageLink: PropTypes.string.isRequired,
+  };
+
   state = {
     shelf: ''
   }

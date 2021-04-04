@@ -1,8 +1,14 @@
-import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
-import Book from './Book'
+import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
+import Book from './Book';
+import PropTypes from "prop-types";
 
 export default class BookShelf extends Component {
+  static propTypes = {
+    shelf: PropTypes.string.isRequired,
+    books: PropTypes.array.isRequired,
+  };
+
   state = {
     book: null,
     shelf: ''
