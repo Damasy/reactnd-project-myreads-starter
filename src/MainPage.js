@@ -7,18 +7,18 @@ import * as BookAPI from './BooksAPI';
 export default class MainPage extends Component {
   state = {
     books: [],
-    shelfs: [],
+    shelves: {},
     searchedBooks: []
   }
   componentDidMount() {
     BookAPI.getAll().then(data => {
       this.setState({books: data});
-      this.generateShelfs(data);
+      this.generateShelves(data);
     })
   }
 
-  generateShelfs = (books) => {
-    const shelfs = {
+  generateShelves = (books) => {
+    const shelves = {
       "currentlyReading": [],
       "wantToRead": [],
       "read": []
@@ -28,18 +28,18 @@ export default class MainPage extends Component {
       const book = books[i]
       const obj = {
         title: book.title,
-        authors: book.authors.join(', '),
+        authors: Array.isArray(book.authors) ? book.authors.join(', ') : book.authors,
         imageLink: book.imageLinks ? book.imageLinks.thumbnail : book.imageLink,
         id: book.id,
         shelf: book.shelf
       }
-      if(shelfs[book.shelf]) {
-        shelfs[book.shelf].push(obj);
+      if(shelves[book.shelf]) {
+        shelves[book.shelf].push(obj);
         continue;
       }
     }
 
-    this.setState({shelfs: shelfs});
+    this.setState({shelves: shelves});
   }
 
   updateBookShelf = (updatedBook, shelf) => {
@@ -58,7 +58,7 @@ export default class MainPage extends Component {
           books: booksInShelf,
         };
       });
-      this.generateShelfs(this.state.books)
+      this.generateShelves(this.state.books)
     });
   };
 
@@ -83,7 +83,7 @@ export default class MainPage extends Component {
           books: bookSet,
         };
       });
-      this.generateShelfs(this.state.books);
+      this.generateShelves(this.state.books);
     });
   };
 
@@ -171,7 +171,7 @@ export default class MainPage extends Component {
         } />
         <Route exact path="/" render={
           () => (<BookShelf
-            shelfs={this.state.shelfs}
+            shelves={this.state.shelves}
             books={this.state.books}
             updateBookShelf={this.updateBookShelf}/>)
         } />
